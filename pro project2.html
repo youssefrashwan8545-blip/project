@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>لوحة تحكم المولد الذكي</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Cairo', sans-serif;
+  background: linear-gradient(135deg, #0084ff, #0084ff);
+  direction: rtl;
+  text-align: center;
+}
+
+/* عنوان */
+h1 {
+  margin: 20px;
+  animation: fadeInDown 1s ease;
+}
+
+/* الكونتينر */
+.container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* الكارت */
+.card {
+  background: rgb(255, 255, 255);
+  width: 260px;
+  margin: 15px;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0);
+  transition: 0.3s;
+  animation: fadeInUp 1s ease;
+}
+
+.card:hover {
+  transform: translateY(-10px) scale(1.03);
+}
+
+/* الرقم */
+.value {
+  font-size: 32px;
+  font-weight: bold;
+  color: #000000;
+  transition: 0.5s;
+}
+
+/* زرار */
+button {
+  margin-top: 20px;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(45deg, #00ef38, #ff0000);
+  color: rgb(255, 255, 255);
+  font-size: 19px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* انيميشن */
+@keyframes fadeInUp {
+  from {opacity: 0; transform: translateY(40px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+@keyframes fadeInDown {
+  from {opacity: 0; transform: translateY(-40px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<h1>⚡ لوحة تحكم المولد الذكي</h1>
+
+<div class="container">
+
+  <div class="card">
+    <h3>🔋 الفولت</h3>
+    <div class="value" id="voltage">0</div>
+  </div>
+
+  <div class="card">
+    <h3>⚡ التيار</h3>
+    <div class="value" id="current">0</div>
+  </div>
+
+  <div class="card">
+    <h3>🔌 الحالة</h3>
+    <div class="value" id="status">...</div>
+  </div>
+
+</div>
+
+<button onclick="turnOn()">تشغيل الجهاز</button>
+
+<script>
+async function fetchData() {
+  try {
+    const res = await fetch("PUT_YOUR_LINK_HERE/api/data");
+    const data = await res.json();
+
+    animateValue("voltage", data.voltage);
+    animateValue("current", data.current);
+
+    if (data.voltage > 0) {
+      document.getElementById("status").innerText = "يعمل";
+      document.body.style.background = "#e8f5e9";
+    } else {
+      document.getElementById("status").innerText = "متوقف";
+      document.body.style.background = "#ffebee";
+    }
+
+  } catch (e) {
+    console.log("خطأ");
+  }
+}
+
+/* انيميشن للأرقام */
+function animateValue(id, newValue) {
+  const element = document.getElementById(id);
+  let start = parseInt(element.innerText) || 0;
+  let range = newValue - start;
+  let step = range / 20;
+
+  let counter = start;
+  let interval = setInterval(() => {
+    counter += step;
+    element.innerText = Math.round(counter);
+
+    if ((step > 0 && counter >= newValue) || (step < 0 && counter <= newValue)) {
+      element.innerText = newValue;
+      clearInterval(interval);
+    }
+  }, 30);
+}
+
+setInterval(fetchData, 2000);
+
+function turnOn() {
+  fetch("PUT_YOUR_LINK_HERE/api/control", { method: "POST" });
+}
+</script>
+
+</body>
+</html>
